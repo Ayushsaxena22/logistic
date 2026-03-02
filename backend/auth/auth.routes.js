@@ -1,4 +1,4 @@
-const userController=require("../controller/controller.js");
+const userController=require("./auth.controller.js");
 const express=require("express");
 const router=express.Router();
 

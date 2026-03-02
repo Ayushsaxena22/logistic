@@ -16,7 +16,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("/api/login", form);
+      const response = await axios.post("http://localhost:8080/api/login", form);
       const { token, role } = response.data.data;
 
       localStorage.setItem("token", token);

@@ -19,11 +19,18 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await axios.post("/api/signup", form);
-    if (response.status === 201) {
-      navigate("/login");
-    } else {
-      alert("Error creating account. Please try again.");
+    try {
+      const response = await axios.post("http://localhost:8080/api/signup", form);
+      if (response.status === 201) {
+        alert("Account created successfully!");
+        navigate("/login");
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Error creating account. Please try again.";
+      alert(msg);
     }
   };
 
