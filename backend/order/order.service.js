@@ -1,6 +1,8 @@
 const Order = require("./order.model");
 const User = require("../auth/auth.model");
 
+const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const createOrder = async (userId, data) => {
   const source = data.source?.trim();
   const destination = data.destination?.trim();
@@ -53,6 +55,45 @@ const getAllOrders = async () => {
     .populate("customer", "username email role")
     .populate("driver", "username email role")
     .sort({ createdAt: -1 });
+};
+
+const getAdminOrdersByDestination = async (destination) => {
+  const query = (destination || "").trim();
+  if (!query) throw new Error("Destination is required");
+
+  const regex = new RegExp(escapeRegex(query), "i");
+
+  return Order.find({ destination: regex })
+    .populate("customer", "username email role")
+    .populate("driver", "username email role")
+    .sort({ createdAt: -1 });
+};
+
+const getSuggestedDriversByDestination = async (destination) => {
+  const query = (destination || "").trim();
+  if (!query) throw new Error("Destination is required");
+
+  const exactRegex = new RegExp(`^${escapeRegex(query)}$`, "i");
+
+  const orders = await Order.find({
+    destination: exactRegex,
+    driver: { $ne: null },
+  })
+    .populate("driver", "username email role")
+    .sort({ createdAt: -1 });
+
+  const seen = new Set();
+  const drivers = [];
+
+  for (const order of orders) {
+    if (!order.driver) continue;
+    const id = String(order.driver._id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    drivers.push(order.driver);
+  }
+
+  return drivers;
 };
 
 const approveOrder = async (orderId, adminId) => {
@@ -137,6 +178,8 @@ module.exports = {
   getMyOrderStatus,
   getMyOrderTrack,
   getAllOrders,
+  getAdminOrdersByDestination,
+  getSuggestedDriversByDestination,
   approveOrder,
   assignDriver,
   getDriverOrders,

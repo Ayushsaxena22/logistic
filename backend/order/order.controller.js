@@ -45,6 +45,24 @@ const getAllOrders = async (req, res) => {
   }
 };
 
+const getAdminOrdersByDestination = async (req, res) => {
+  try {
+    const orders = await orderService.getAdminOrdersByDestination(req.query.destination);
+    res.json({ success: true, data: orders });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+const getSuggestedDriversByDestination = async (req, res) => {
+  try {
+    const drivers = await orderService.getSuggestedDriversByDestination(req.query.destination);
+    res.json({ success: true, data: drivers });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
 const approveOrder = async (req, res) => {
   try {
     const order = await orderService.approveOrder(req.params.id, req.user.userId);
@@ -100,6 +118,8 @@ module.exports = {
   getMyOrderStatus,
   getMyOrderTrack,
   getAllOrders,
+  getAdminOrdersByDestination,
+  getSuggestedDriversByDestination,
   approveOrder,
   assignDriver,
   getDriverOrders,
